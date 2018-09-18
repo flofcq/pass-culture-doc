@@ -6,20 +6,17 @@ Les partenaires s'identifient auprès de l'API Pass Culture à l'aide d'un jeton
 
 **Statut actuel : ébauche, pour discussions**
 
-##### Vérifier une contremarque [GET /bookings/<token>]
+##### Vérifier une contremarque [GET /bookings/token/<token>]
 
 Vérifie la validité d'une contremarque et récupère les informations de la transaction associée (uniquement si la contremarque est associée à une offre du partenaire identifié sur l'API).
 
 + Parameters
 
   + token (string) - le code de réservation
-  + email (optional, string) - correspond à l'email de la personne qui tente d'utiliser la contremarque pour obtenir une offre
+  + email (optional, string) - obligatoire si le partenaire n'est pas identifié, correspond à l'email de la personne qui tente d'utiliser la contremarque pour obtenir une offre
   + offerId (optional, string) - identifiant de l'offre supposée correspondre à la réservation
 
 + Request (application/json)
-
-    + Headers
-       Authorization: Bearer xxxxx.yyyyy.zzzzz
 
     + Body
     
@@ -31,29 +28,23 @@ Vérifie la validité d'une contremarque et récupère les informations de la tr
               }
             ]
 
-+ Response 200 (application/json)
++ Response 200 (application/json) dans le cas où le partenaire est identifié sur l'API.
 
     + Body
 
             [
               {
-                 "global": "OK",
-                 "email": "test@test.com",
-                 "userId": "Rosa",
-                 "offerId": "ABDE",
-                 "bookingId": "XYZ",
+                "bookingId": "ABC", 
+                "email": "test@test.com",
+                "userName": "John Doe",
+                "offerName": "Offre Test", 
+                "date": "2018-09-18T10:50:34.076546Z"
+                "isUsed": False,
+                "venueDepartementCode": "93"
               }
             ]
             
-+ Response 400 (application/json)
-
-    + Body
-
-            [
-              {
-                 "global": "Code contremarque invalide"
-              }
-            ]
++ Response 204 (application/json) dans le cas où le partenaire n'est pas identifié sur l'API.
 
 + Response 400 (application/json)
 
@@ -61,48 +52,31 @@ Vérifie la validité d'une contremarque et récupère les informations de la tr
 
             [
               {
-                 "global": "Contremarque déjà validée"
+                 "global": "Ce coupon n'a pas été trouvé"
               }
             ]
 
-
-+ Response 400 (application/json)
++ Response 400 (application/json) dans le cas où le partenaire n'est pas identifié
 
     + Body
 
             [
               {
-                 "global": "Contremarque expirée"
+                 "email": "Vous devez préciser l\'email de l\'utilisateur quand vous n\'êtes pas connecté(e)"
               }
             ]
 
+##### Valider une contremarque [PATCH /bookings/token/<token>]
 
-+ Response 400 (application/json)
-
-    + Body
-
-            [
-              {
-                 "global": "Vous ne disposez pas des droits pour accéder à cette contremarque"
-              }
-            ]
-
-##### Valider une contremarque [POST /bookings/validate]
-
-Valide une contremarque (et la transaction associée).
-
-Un code contremarque est valide 1 semaine pour les offres physiques, 30 minutes pour les offres numériques.
+Valide une contremarque (et la transaction associée). Le partenaire doit obligatoirement être identifié.
 
 + Parameters
 
-  + email (optional, string) - obligatoire pour les offres numériques, correspond à l'email de la personne qui tente d'utiliser la contremarque pour obtenir une offre
+  + email (optional, string) - correspond à l'email de la personne qui tente d'utiliser la contremarque pour obtenir une offre
   + token (string) - le code de réservation
-  + offerId (optional, string) - identifiant de l'offre supposée correspondre à la réservation. Obligatoire pour les offres numériques.
+  + offerId (optional, string) - identifiant de l'offre supposée correspondre à la réservation
 
 + Request (application/json)
-
-    + Headers
-       Authorization: Bearer xxxxx.yyyyy.zzzzz
 
     + Body
        { 
@@ -111,7 +85,7 @@ Un code contremarque est valide 1 semaine pour les offres physiques, 30 minutes 
          "offerId": "ABDE"
        }
 
-+ Response 200 (application/json)
++ Response 204 (application/json)
 
 + Response 400 (application/json)
 
@@ -119,38 +93,29 @@ Un code contremarque est valide 1 semaine pour les offres physiques, 30 minutes 
 
             [
               {
-                 "token": "Code contremarque invalide"
+                 "global": ""Cette structure n'est pas enregistrée chez cet utilisateur.""
               }
             ]
 
-+ Response 400 (application/json)
++ Response 404 (application/json)
+
++ Response 410 (application/json)
 
     + Body
 
             [
               {
-                 "global": "Contremarque déjà validée"
-              }
-            ]
-
-
-+ Response 400 (application/json)
-
-    + Body
-
-            [
-              {
-                 "global": "Contremarque expirée"
+                 "booking": "Cette réservation a été annulée"
               }
             ]
 
 
-+ Response 400 (application/json)
++ Response 410 (application/json)
 
     + Body
 
             [
               {
-                 "global": "token et offerId ne correspondent pas"
+                 "booking": "Cette réservation a déjà été validée"
               }
             ]
