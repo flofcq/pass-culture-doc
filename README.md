@@ -1,6 +1,6 @@
 # Documentation de l'API Pass Culture
 
-Voir le site https://passculture-doc.netlify.com
+Voir le site https://api-doc-passculture.netlify.com
 
 ## Installation des outils
 
